@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  rabbit:
+    image: rabbit:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+  dbetud:
+    image: mongo
+    ports:
+      - 30000:27017
+    volumes:
+      - dbetudiants:/data/db
+  dbnote:
+    image: mongo
+    ports:
+      - 30001:27017
+    volumes:
+      - dbnotes:/data/db
+  etudiant:
+    build: ./Etudiant-service
+    ports:
+      - 3000:3000
+    environment:
+      - port=3000
+      - url_mongoose=mongodb://dbetud:27017/dbetudiants
+      - url_rabbit=amqp://guest:guest@rabbit:5672
+      - secret=4e129721135ce7cbde0cd68bc4f7167e306367660f2ad3e14718c59ff9377308846905d0b136428da1e9dff9377308846905d0b136428daff9377308846905d0b136428da1e9d6085b56f73c
+    depends_on:
+      - rabbit
+      - dbetud
+  note:
+    build: ./Note-service
+    ports:
+      - 3001:3000
+    environment:
+      - port=3000
+      - url_mongoose=mongodb://dbnote:27017/dbnotes
+      - url_rabbit=amqp://guest:guest@rabbit:5672
+    depends_on:
+      - rabbit
+      - dbnote
+volumes:
+  - dbetudiants:
+  - dbnotes:
