@@ -33,6 +33,7 @@ async function connectToRabbitMQ() {
     await channel.assertQueue(queueName);
 }
 
+connectToRabbitMQ();
 
 routes.get('/all', authenticateToken, (req, res) => {
     EtudiantModel.find().then((etuds) => {
@@ -66,8 +67,6 @@ routes.delete('/delete/:cef', authenticateToken, (req, res) => {
             channel.sendToQueue(queueName, Buffer.from(cef))
             return res.sendStatus(201);
         } 
-
-
     })
 
 })
